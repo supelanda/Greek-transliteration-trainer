@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Greek Transliteration Trainer</title>
+<style>
+:root{--bg:#eff1ec;--cd:#fbfbf8;--tx:#1d2420;--mu:#6b746d;--ac:#4f6a3a;--ac2:#b9832a;--ok:#2f7d4f;--ko:#b3263e;--bd:#d8dcd3}
+[data-t=dark]{--bg:#141916;--cd:#1e2521;--tx:#e8ece6;--mu:#98a29a;--ac:#8fb36b;--ac2:#e0b04f;--ok:#6cc58c;--ko:#f0728a;--bd:#323b35}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Segoe UI","Noto Sans",system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;max-width:760px;margin:auto}
+h1{font:700 1.15rem "Noto Serif",Georgia,serif;margin:0}
+main,#sc{max-width:760px;margin:auto;padding:0 16px}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:20px;margin:12px 0}
+#sc{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+#sc .card{display:flex;gap:18px;align-items:center;width:100%;margin:4px 0}
+#pc{font:700 2.4rem/1 "Noto Serif",Georgia,serif;color:var(--ac)}
+.mu{color:var(--mu);font-size:.9rem}.ok{color:var(--ok)}.ko{color:var(--ko)}
+label{display:block;margin:10px 0;font-size:.9rem;color:var(--mu)}
+select,input,button{font:inherit;color:var(--tx)}
+select{display:block;width:100%;padding:9px;margin-top:4px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+button{padding:9px 14px;border:1px solid var(--bd);background:var(--bg);border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--ac)}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+button.pri{background:var(--ac);border-color:var(--ac);color:var(--cd)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ac2);transition:width .3s}
+.meta{display:flex;justify-content:space-between;margin-top:6px}
+#gw{font:600 clamp(2.4rem,11vw,4.6rem)/1.15 "Noto Serif","Times New Roman",serif;text-align:center;margin:28px 0 20px;word-break:break-word}
+#gw.p{font-size:clamp(1.4rem,6vw,2.2rem)}
+#in{width:100%;padding:13px;font-size:1.3rem;text-align:center;background:var(--bg);border:2px solid var(--bd);border-radius:10px}
+#in.r{border-color:var(--ok)}#in.w{border-color:var(--ko)}
+#fb{min-height:3rem;margin-top:14px}#fb li{margin:2px 0}
+.sh{animation:sh .3s}.pp{animation:pp .3s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pp{50%{transform:scale(1.04)}}
+dialog{max-width:560px;width:92%;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:14px}
+dialog::backdrop{background:#0008}table{width:100%;border-collapse:collapse}td{padding:3px 6px;border-bottom:1px solid var(--bd)}
+@media(prefers-reduced-motion:reduce){.sh,.pp{animation:none}}
+</style></head><body>
+<header><h1>Ελληνικά · Transliteration Trainer</h1><div><button id="bs">Statistiche</button> <button id="bt">Tema</button></div></header>
+<div id="sc"><div class="card"><div><span id="pc">–</span><span>%</span></div>
+<div>Corrette <b class="ok" id="ok">0</b> · Errate <b class="ko" id="ko">0</b> · Tentate <b id="tt">0</b><br>
+<span class="mu">Serie <span id="sk">0</span> · Sessione <span id="ps">–</span></span></div></div></div>
+<main>
+<div id="menu" class="card"><h2 style="margin-top:0">Nuova sessione</h2><p id="msg" class="mu"></p>
+<label>Modalità<select id="md"><option value="cas">Casual</option><option value="prog">Progressiva (A1 → C2)</option><option value="real">Solo parole reali</option><option value="inv">Solo parole inventate</option><option value="hard">Modalità difficile</option><option value="phr">Frasi</option><option value="inf">Infinita</option></select></label>
+<label>Numero di esercizi<select id="cn"><option>10<option>20<option selected>50<option>100<option>500<option value="0">Infinito</select></label>
+<label>Velocità dopo una risposta corretta<select id="spd"><option value="0">Manuale (premi Invio)<option value="1800">Lenta<option value="900" selected>Media<option value="300">Veloce</select></label>
+<div class="btns"><button id="go" class="pri">Inizia</button><button id="rs2" hidden>Riprendi sessione</button><button id="rv" hidden>Ripassa gli errori</button></div></div>
+<div id="ex" class="card" hidden>
+<div class="bar"><i id="pb"></i></div><div class="meta mu"><span id="mdn"></span><span id="cnt"></span></div>
+<div id="gw" lang="el"></div>
+<input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="trascrizione…" aria-label="Trascrizione">
+<div id="fb" aria-live="polite"></div>
+<div class="btns"><button id="ck" class="pri">Controlla</button><button id="nx" class="pri" hidden>Avanti</button><button id="skp">Salta</button><button id="so">Mostra soluzione</button><button id="sp" hidden>Ascolta</button><button id="stp">Pausa</button></div></div>
+</main>
+<dialog id="sd"></dialog>
+<script>
+//ENGINE ===== Motore di trascrizione: prima le combinazioni, poi le lettere singole =====
+const V='αεηιουω',VL='κξπστφχψθ';
+const SG={α:'a',β:'v',γ:'g',δ:'dh',ε:'e',ζ:'z',η:'i',θ:'th',ι:'i',κ:'k',λ:'l',μ:'m',ν:'n',ξ:'x',ο:'o',π:'p',ρ:'r',σ:'s',τ:'t',υ:'i',φ:'f',χ:'ch',ψ:'ps',ω:'o'};
+const SR={β:'β = v',δ:'δ = dh',θ:'θ = th',χ:'χ = ch',ξ:'ξ = x',ψ:'ψ = ps',η:'η = i',υ:'υ = i',ω:'ω = o'};
+const AC={a:'à',e:'è',i:'ì',o:'ò',u:'ù'};
+const GFRONT='g'; // resa di γ davanti a vocale palatale (convenzione: sempre g)
+function parse(w){ // lettere con flag accento (a) e dieresi (d)
+ return [...w.toLowerCase().replace(/ς/g,'σ').normalize('NFD')].reduce((r,ch)=>{
+  if(ch==='\u0301'){if(r.length)r[r.length-1].a=1}
+  else if(ch==='\u0308'){if(r.length)r[r.length-1].d=1}
+  else if(/[α-ω]/.test(ch))r.push({c:ch,a:0,d:0});
+  return r},[]);
+}
+function tr(w){
+ const L=parse(w),T=[],n=L.length,nx=k=>L[k]?L[k].c:'';let i=0;
+ while(i<n){
+  const x=L[i],y=L[i+1],c=x.c,d=y?y.c:'',ini=i===0,p=c+d;
+  // 1) dittonghi vocalici (nessun accento/dieresi sulla prima lettera, nessuna dieresi sulla seconda)
+  if(y&&!x.a&&!x.d&&!y.d&&V.includes(c)){
+   const M={αι:'e',ει:'i',οι:'i',υι:'i',ου:'u'};
+   if(M[p]){T.push({g:p,l:M[p],s:y.a,k:p,r:p+' = '+M[p]});i+=2;continue}
+   if(p==='αυ'||p==='ευ'){
+    const k=nx(i+2),f=!k||VL.includes(k),l=(c==='α'?'a':'e')+(f?'f':'v');
+    T.push({g:p,l,s:y.a,k:p,r:`${p} = ${l}: davanti a ${k?(f?'consonante sorda':'vocale o consonante sonora')+' ('+k+')':'fine parola'} si pronuncia ${f?'f':'v'}`});i+=2;continue}
+  }
+  // 2) combinazioni consonantiche
+  let o=null;
+  if(p==='μπ')o=ini?['b','μπ a inizio parola = b']:['mb','μπ all’interno = mb'];
+  else if(p==='ντ')o=ini?['d','ντ a inizio parola = d']:['nd','ντ all’interno = nd'];
+  else if(p==='γκ')o=ini?['g','γκ a inizio parola = g']:['ng','γκ all’interno = ng'];
+  else if(p==='γγ')o=['ng','γγ = ng'];
+  else if(p==='τσ')o=['ts','τσ = ts'];
+  else if(p==='τζ')o=['dz','τζ = dz'];
+  if(o){T.push({g:p,l:o[0],s:0,k:p,r:o[1]});i+=2;continue}
+  if(y&&c===d&&!V.includes(c)){T.push({g:p,l:SG[c],s:0,k:'doppia',r:p+': consonante doppia = suono singolo ('+SG[c]+')'});i+=2;continue}
+  // 3) lettera singola
+  let l=SG[c],k=SR[c]?c:null,r=SR[c]||null;
+  if(c==='γ'&&y&&('εηιυ'.includes(d)||('αο'.includes(d)&&nx(i+2)==='ι'&&!y.a&&!L[i+2].d))){l=GFRONT;k='γ+palatale';r='γ davanti a vocale palatale: pronuncia palatale, resa con g'}
+  T.push({g:c,l,s:V.includes(c)?x.a:0,k,r});i++;
+ }
+ const out=a=>T.map(t=>a&&t.s?t.l.replace(/[aeiou]/,m=>AC[m]):t.l).join('');
+ return{a:out(1),p:out(0),T};
+}
+function trs(s){ // parola o frase
+ const W=s.split(/\s+/).map(tr).filter(r=>r.T.length);
+ return{a:W.map(r=>r.a).join(' '),p:W.map(r=>r.p).join(' '),T:W.reduce((q,r,j)=>q.concat(j?[{g:' ',l:' '}]:[],r.T),[])};
+}
+const ua=s=>s.replace(/[àèìòù]/g,m=>'aeiou'['àèìòù'.indexOf(m)]);
+const nz=s=>s.toLowerCase().replace(/[^a-zàèìòù ]/g,' ').replace(/\s+/g,' ').trim();
+const same=(v,R)=>{const u=nz(v);return u===(/[àèìòù]/.test(u)?nz(R.a):R.p)};
+function diff(v,R){let s=ua(nz(v));for(const t of R.T){if(s.startsWith(t.l))s=s.slice(t.l.length);else return t}return null}
+///ENGINE
+// ===== Lessico: 3 gruppi (A1-A2, B1-B2, C1-C2); ogni gruppo diviso a metà per i due livelli =====
+const LEX=[
+"ναι όχι δεν νερό ψωμί σπίτι γάτα σκύλος ψάρι γάλα τυρί κρασί καφές τσάι δρόμος ήλιος μπάλα ντομάτα καλός θάλασσα φεγγάρι μητέρα πατέρας παιδί φίλος αυτοκίνητο βιβλίο τραπέζι καρέκλα πόρτα παράθυρο λουλούδι αύριο σήμερα αυτοί γκρι πέντε ελληνικά τρώω θέλω",
+"δουλειά ταξίδι ελπίδα ιστορία ζωή αγάπη μνήμη γειτονιά αγγλικά μπορώ ντύνομαι θυμάμαι ξεχνάω ανοίγω ευκαιρία πρόβλημα απάντηση ανάγκη ενδιαφέρον αεροδρόμιο βιβλιοθήκη εκπαίδευση καταλαβαίνω προσπαθώ ελευθερία πανεπιστήμιο",
+"επιχείρηση ουσιαστικός διεθνής υποχρέωση αποτέλεσμα οικονομία δημοκρατία φιλοσοφία ευθύνη υπολογιστής αναπόφευκτος παρεξήγηση αντιμετώπιση διαφορετικός αυθαίρετος συγκέντρωση συγγενής ηλεκτρόνιο μικροσκόπιο τηλεπικοινωνία αυτοματισμός αλγόριθμος"
+].map(s=>s.split(' '));
+const SENT="Καλημέρα, τι κάνεις;|Μου αρέσει η θάλασσα.|Δεν ξέρω ελληνικά.|Πού είναι το σπίτι σου;|Θέλω ένα ποτήρι νερό.|Το αυτοκίνητο είναι στο γκαράζ.|Αγαπώ τη μουσική και τα ταξίδια.|Αύριο θα πάμε στην παραλία.".split('|');
+// ===== Generatore di parole inventate, vincolato alla fonotassi del greco moderno =====
+const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],W=s=>s.split(' ');
+// attacchi sillabici ammessi (livelli crescenti): singole -> nessi occlusiva/fricativa+liquida, s+occlusiva -> nessi rari e triplici
+const O1=W('κ π τ μ ν σ λ ρ δ β φ θ ζ γ χ'),
+ O2=O1.concat(W('ψ ξ μπ ντ γκ τσ τζ στ σπ σκ πρ τρ κρ βρ φρ δρ γρ θρ χρ πλ κλ βλ γλ φλ χλ')),
+ O3=O2.concat(W('σφ σχ σθ σμ σν πτ κτ φτ χτ φθ χθ γδ κν πν μν τμ στρ σπρ σκρ σπλ σκλ'));
+const DB=W('λλ σσ ττ νν μμ ρρ κκ ππ γγ'); // doppie, solo all'interno
+const CM={ρ:W('κ π τ μ ν σ β γ δ φ χ θ ζ'),λ:W('κ π τ μ φ χ θ β γ δ σ'),ν:W('θ χ δ β σ φ ξ'),σ:W('κ π τ φ χ θ μ ν')}; // nessi interni: coda + attacco
+const N1=W('α ε ι ο η υ ω'),N2=N1.concat(W('αι ει οι ου')),N3=N2.concat(W('αυ ευ αι ου ει'));
+const NF=W('α ε ι ο η υ ω ου οι αι ει'); // nuclei ammessi a fine parola (no αυ/ευ finali)
+const TN={α:'ά',ε:'έ',η:'ή',ι:'ί',ο:'ό',υ:'ύ',ω:'ώ',αι:'αί',ει:'εί',οι:'οί',υι:'υί',ου:'ού',αυ:'αύ',ευ:'εύ'};
+const REAL=new Set([].concat(...LEX));
+function inv(l){
+ const ns=[2,pick([2,3]),3,pick([3,4]),pick([4,5]),pick([4,5,6]),4+rnd(5)][l];
+ const NU=l<2?N1:l<4?N2:N3,ON=l<2?O1:l<4?O2:O3,ac=ns-1-rnd(Math.min(3,ns));
+ let w='',pv='',u='';
+ for(let k=0;k<ns;k++){
+  u=pick(k===ns-1?NF.filter(x=>NU.includes(x)):NU);let o;
+  if(!k)o=rnd(3)?pick(ON):'';                       // parola vocalica ammessa
+  else{
+   const r=rnd(10);
+   if(l<3||r<5)o=pick(ON);
+   else if(r<7)o=pick(DB);
+   else{const c=pick(Object.keys(CM));o=c+pick(CM[c])}
+   if(l>=4&&pv==='ι'&&u.length===1&&'αοωε'.includes(u)&&!rnd(3))o=''; // iato tipico: ια, ιο, ιω, ιε
+  }
+  w+=o+(k===ac?TN[u]:u);pv=u;
+ }
+ if(u.length===1||u==='ου')w+=pick(['','','','ς','ς','ν']); // fine parola: solo vocale, -ς o -ν
+ return w;
+}
+// ===== Dati, stato, statistiche =====
+const $=id=>document.getElementById(id),LB=['A1','A2','B1','B2','C1','C2','Estremo'];
+let D,S=null,cur=null,R=null,st='ask',t0=0,tmr=0,VO=null;
+const DEF={t:0,o:0,k:0,st:0,best:0,tm:0,lv:{},ru:{},er:{},hist:[],wrong:[],pf:{th:matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light',sp:900}};
+try{D=Object.assign({},DEF,JSON.parse(localStorage.getItem('gtt')))}catch(e){D=Object.assign({},DEF)}
+const sv=()=>{try{localStorage.setItem('gtt',JSON.stringify(D));localStorage.setItem('gtts',S?JSON.stringify({S,cur}):'')}catch(e){}};
+const pct=(o,t)=>t?(o/t*100).toFixed(1):'–';
+function rsc(){ // percentuale: corrette ÷ tentate × 100, aggiornata dopo ogni risposta
+ $('pc').textContent=pct(D.o,D.t);$('ok').textContent=D.o;$('ko').textContent=D.k;$('tt').textContent=D.t;$('sk').textContent=D.st;
+ $('ps').textContent=S&&(S.o+S.k)?pct(S.o,S.o+S.k)+'%':'–';
+}
+function mk(){
+ const m=S.mode,inf=!S.cnt,lv=m==='prog'?Math.min(5,inf?Math.floor(S.n/10):Math.floor(S.n*6/S.cnt)):rnd(7);
+ const real=l=>{const g=LEX[l>>1],h=g.length>>1;return{w:pick(l%2?g.slice(h):g.slice(0,h)),t:'real',l}};
+ const iv=l=>({w:inv(l),t:'inv',l});
+ if(m==='phr')return{w:pick(SENT),t:'phr',l:2};
+ if(m==='real')return real(rnd(6));
+ if(m==='inv')return iv(rnd(7));
+ if(m==='hard')return rnd(10)<7?iv(6):real(4+rnd(2));
+ if(m==='prog')return rnd(4)?real(lv):iv(lv);
+ return lv===6?iv(6):rnd(2)?real(lv):iv(lv);
+}
+function gen(){
+ if(S.mode==='rev')return S.q.shift();
+ if(D.wrong.length&&S.mode!=='phr'&&Math.random()<.2){const e=pick(D.wrong);if(e.w!==(cur&&cur.w))return Object.assign({},e)} // ripetizione dei più difficili
+ for(let k=0;k<40;k++){const e=mk();if(e.t==='inv'&&REAL.has(e.w))continue;if(!S.seen.includes(e.w)){S.seen.push(e.w);return e}}
+ return mk();
+}
+function start(mode,cnt,q){
+ S={mode,cnt,n:0,o:0,k:0,seen:[],q};D.pf.sp=+$('spd').value;next();
+}
+function next(){
+ clearTimeout(tmr);
+ if(S.cnt&&S.n>=S.cnt)return fin();
+ cur=gen();if(!cur)return fin();cur.done=0;show();
+}
+function show(){
+ R=trs(cur.w);st='ask';t0=Date.now();
+ $('menu').hidden=true;$('ex').hidden=false;
+ $('gw').textContent=cur.w;$('gw').className=cur.t==='phr'?'p':'';
+ const i=$('in');i.value='';i.className='';$('fb').innerHTML='';
+ $('ck').hidden=false;$('nx').hidden=true;
+ $('mdn').textContent=$('md').selectedOptions[0]&&S.mode!=='rev'?$('md').querySelector(`[value=${S.mode}]`).textContent:'Ripasso errori';
+ $('cnt').textContent=S.cnt?`${S.n} / ${S.cnt}`:`${S.n} · ∞`;
+ $('pb').style.width=(S.cnt?S.n/S.cnt*100:(S.n%10)*10)+'%';
+ i.focus();sv();
+}
+function reg(ok){ // un solo tentativo conta per parola: 1 punto se corretta, 0 altrimenti
+ const tm=(Date.now()-t0)/1000;cur.done=1;
+ D.t++;ok?D.o++:D.k++;D.tm+=tm;D.st=ok?D.st+1:0;D.best=Math.max(D.best,D.st);
+ S.n++;ok?S.o++:S.k++;
+ const L=D.lv[cur.l]=D.lv[cur.l]||{t:0,o:0};L.t++;if(ok)L.o++;
+ [...new Set(R.T.filter(t=>t.k).map(t=>t.k))].forEach(k=>{const u=D.ru[k]=D.ru[k]||{t:0,e:0};u.t++;if(!ok)u.e++});
+ if(!ok){D.er[cur.w]=(D.er[cur.w]||0)+1;if(!D.wrong.some(e=>e.w===cur.w))D.wrong.push({w:cur.w,t:cur.t,l:cur.l})}
+ else D.wrong=D.wrong.filter(e=>e.w!==cur.w);
+ D.hist.push([new Date().toISOString().slice(0,16).replace('T',' '),cur.t,LB[cur.l],cur.w,R.a,$('in').value,ok?'corretto':'errato',tm.toFixed(1)]);
+ if(D.hist.length>1000)D.hist.shift();
+ rsc();
+}
+function fb(ok,v){
+ const T=cur.t==='inv'?'<b>⚠ Parola inventata:</b> non esiste in greco.':cur.t==='phr'?'Frase in greco moderno.':'Parola reale.';
+ let h=ok?`<b class="ok">CORRETTO!</b> ${R.a}`:`<b class="ko">NON CORRETTO.</b> Risposta corretta: <b>${R.a}</b>`;
+ if(!ok){
+  let m='';
+  if(v!=null){
+   if(ua(nz(v))===R.p&&nz(v)!==R.p)m='Lettere giuste, ma accento sulla sillaba sbagliata.';
+   else{const t=diff(v,R);m=t?`Primo errore su <b>${t.g}</b>: si scrive <b>${t.l}</b>${t.r?' — '+t.r:''}.`:'La trascrizione è troppo corta o troppo lunga.'}
+  }
+  h+=`<p>${m}</p><div class="mu">${R.T.map(t=>t.k?`<b>${t.g}→${t.l}</b>`:`${t.g}→${t.l}`).join(' · ')}</div>`;
+  const rl=[...new Map(R.T.filter(t=>t.r).map(t=>[t.k,t])).values()];
+  if(rl.length)h+='<ul>'+rl.map(t=>`<li>${t.r}</li>`).join('')+'</ul>';
+ }
+ $('fb').innerHTML=h+`<div class="mu">${T} Livello ${LB[cur.l]}.</div>`;
+}
+function good(){
+ if(!cur.done)reg(true);st='right';$('in').className='r pp';fb(1);
+ $('ck').hidden=true;$('nx').hidden=false;sv();
+ if(D.pf.sp>0){clearTimeout(tmr);tmr=setTimeout(next,D.pf.sp)}
+}
+function bad(v){
+ if(!cur.done)reg(false);st='wrong';const i=$('in');i.className='w';void i.offsetWidth;i.className='w sh';
+ fb(0,v);$('nx').hidden=false;sv();i.select();
+}
+function check(){const v=$('in').value;if(!nz(v))return;same(v,R)?good():bad(v)}
+function fin(){
+ clearTimeout(tmr);const o=S.o,t=S.o+S.k;S=null;cur=null;sv();
+ $('ex').hidden=true;$('menu').hidden=false;
+ $('msg').textContent=t?`Sessione conclusa: ${o} corrette su ${t} (${pct(o,t)}%).`:'';menu();rsc();
+}
+function menu(){
+ let s;try{s=localStorage.getItem('gtts')}catch(e){}
+ $('rs2').hidden=!(s&&!S);$('rv').hidden=!D.wrong.length;
+}
+// ===== Eventi =====
+$('go').onclick=()=>{const m=$('md').value;start(m,m==='inf'?0:+$('cn').value,null);$('msg').textContent=''};
+$('rv').onclick=()=>{const q=D.wrong.slice().sort(()=>Math.random()-.5).map(e=>Object.assign({},e));start('rev',q.length,q)};
+$('rs2').onclick=()=>{try{const o=JSON.parse(localStorage.getItem('gtts'));S=o.S;cur=o.cur;cur&&!cur.done?show():next()}catch(e){}};
+$('ck').onclick=check;$('nx').onclick=next;
+$('skp').onclick=next; // salta: non conta come tentativo
+$('so').onclick=()=>{if(st!=='right')bad(null)};
+$('stp').onclick=()=>{clearTimeout(tmr);sv();const s=S;S=null;$('ex').hidden=true;$('menu').hidden=false;menu();rsc();S=null;if(s)$('rs2').hidden=false};
+$('in').oninput=()=>{if(st!=='right'&&same($('in').value,R))good()}; // correzione immediata
+$('in').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();st==='right'?next():check()}};
+$('sp').onclick=()=>{const u=new SpeechSynthesisUtterance(cur.w.replace(/[.,;!]/g,''));u.lang='el-GR';u.voice=VO;speechSynthesis.cancel();speechSynthesis.speak(u)};
+if('speechSynthesis' in window){const f=()=>{VO=speechSynthesis.getVoices().find(v=>/^el/i.test(v.lang));$('sp').hidden=!VO};f();speechSynthesis.onvoiceschanged=f}
+const theme=()=>{document.documentElement.dataset.t=D.pf.th;sv()};
+$('bt').onclick=()=>{D.pf.th=D.pf.th==='dark'?'light':'dark';theme()};
+$('bs').onclick=stats;
+function stats(){
+ const a=D.t?D.tm/D.t:0,E=Object.entries;
+ let h=`<h2 style="margin-top:0">Statistiche</h2><p>Parole <b>${D.t}</b> · corrette <b class="ok">${D.o}</b> · errate <b class="ko">${D.k}</b> · precisione <b>${pct(D.o,D.t)}%</b><br>Tempo medio <b>${a.toFixed(1)} s</b> · serie attuale <b>${D.st}</b> · record <b>${D.best}</b></p><h3>Progressi per livello</h3><table>`;
+ LB.forEach((n,i)=>{const x=D.lv[i];h+=`<tr><td>${n}</td><td>${x?x.o+' / '+x.t:'–'}</td><td>${x?(x.o/x.t*100).toFixed(0)+'%':''}</td></tr>`});
+ const r=E(D.ru).filter(e=>e[1].e).sort((a,b)=>b[1].e/b[1].t-a[1].e/a[1].t||b[1].e-a[1].e).slice(0,8);
+ h+='</table><h3>Combinazioni più difficili</h3>'+(r.length?'<ul>'+r.map(([k,u])=>`<li><b>${k}</b>: ${u.e} errori su ${u.t} (${(u.e/u.t*100).toFixed(0)}%)</li>`).join('')+'</ul>':'<p class="mu">Nessun errore finora.</p>');
+ const w=E(D.er).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ h+='<h3>Errori più frequenti</h3>'+(w.length?'<ul>'+w.map(([k,n])=>`<li>${k}: ${n} volte</li>`).join('')+'</ul>':'<p class="mu">Nessun errore finora.</p>');
+ h+=`<p class="mu">Archivio: ultime ${D.hist.length} parole (max 1000).</p><div class="btns"><button id="csv">Esporta CSV</button><button id="rz">Azzera progressi</button><button id="cl" class="pri">Chiudi</button></div>`;
+ $('sd').innerHTML=h;$('sd').showModal();
+ $('cl').onclick=()=>$('sd').close();
+ $('csv').onclick=()=>{
+  const f=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[['Metrica','Valore'],['Tentate',D.t],['Corrette',D.o],['Errate',D.k],['Precisione %',pct(D.o,D.t)],['Tempo medio s',a.toFixed(1)],['Record serie',D.best],[],['Data','Tipo','Livello','Parola','Riferimento','Risposta','Esito','Secondi']].concat(D.hist);
+  const b=new Blob(['\ufeff'+rows.map(x=>x.map(f).join(',')).join('\n')],{type:'text/csv'}),l=document.createElement('a');
+  l.href=URL.createObjectURL(b);l.download='greek-trainer-statistiche.csv';l.click();
+ };
+ $('rz').onclick=()=>{if(confirm('Azzerare tutti i progressi? L’operazione non si può annullare.')){D=Object.assign({},DEF,{pf:D.pf,lv:{},ru:{},er:{},hist:[],wrong:[]});S=null;cur=null;sv();$('sd').close();$('ex').hidden=true;$('menu').hidden=false;menu();rsc()}};
+}
+$('spd').value=D.pf.sp;theme();rsc();menu();
+</script></body></html>
