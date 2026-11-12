@@ -391,7 +391,7 @@ function buildIm(){
  $('im').innerHTML=`<div class="imh"><h2>Impara · lettura e pronuncia del greco moderno</h2><button id="imx" class="pri">Chiudi</button></div>
  <div class="ctl">Audio <select id="rt" aria-label="Velocità"><option value="n">Normale</option><option value="s">Lenta</option></select> <button id="rep">Ripeti</button> <span id="vm" class="ko"></span></div>
  <input id="sq" type="search" placeholder="Cerca una lettera, un suono IPA, una combinazione o una parola…" aria-label="Cerca">
- <div class="chips" id="fl">${[['all','Tutto'],['v','Vocali'],['c','Consonanti'],['m','Combinazioni'],['i','IPA'],['w','Parole']].map(x=>`<button data-f="${x[0]}"${x[0]==='all'?' class="on"':''}>${x[1]}</button>`).join('')}</div>
+ <div class="chips" id="fl"><button data-f="w">Parole</button></div>
  <div id="sr" hidden></div><div id="tb"><div class="chips" id="sn">${TABS.map((t,i)=>`<button data-p="${t[0]}"${i?'':' class="on"'}>${t[1]}</button>`).join('')}</div>${TABS.map((t,i)=>`<section id="p-${t[0]}"${i?' hidden':''}>${t[2]()}</section>`).join('')}</div>`;
  av();
 }
@@ -399,7 +399,7 @@ function srch(){
  const q=nn($('sq').value.trim()),on=q||FL!=='all';
  $('sr').hidden=!on;$('tb').hidden=on;if(!on)return;
  const r=ENT.map((e,i)=>[e,i]).filter(([e])=>(FL==='all'||e.f===FL)&&(!q||e.blob.includes(q)));
- $('sr').innerHTML=r.length?`<p class="mu">${r.length} risultati${r.length>80?' (primi 80)':''}</p>`+r.slice(0,80).map(([e,i])=>`<div class="res"${row(i)}><b lang="el">${e.t}</b> <span class="mu">${e.k} · ${e.sub}</span></div>`).join(''):'<p class="mu">Nessun risultato.</p>';
+ $('sr').innerHTML=r.length?`<p class="mu">${r.length} risultati${r.length>500?' (primi 500)':''}</p>`+r.slice(0,500).map(([e,i])=>`<div class="res"${row(i)}><b lang="el">${e.t}</b> <span class="mu">${e.k} · ${e.sub}</span></div>`).join(''):'<p class="mu">Nessun risultato.</p>';
 }
 // ----- esercizi facoltativi (statistiche separate da quelle principali) -----
 let QZ=null,QS={o:0,t:0};
@@ -449,7 +449,7 @@ document.addEventListener('click',e=>{
  const g=t=>e.target.closest(t);let b;
  if(b=g('[data-s]'))return say(b.dataset.s);
  if(b=g('[data-o]'))return ans(+b.dataset.o);
- if(b=g('[data-f]')){FL=b.dataset.f;[...$('fl').children].forEach(x=>x.classList.toggle('on',x===b));return srch()}
+ if(b=g('[data-f]')){FL=FL===b.dataset.f?'all':b.dataset.f;[...$('fl').children].forEach(x=>x.classList.toggle('on',FL===x.dataset.f));return srch()} // “Parole” è un interruttore
  if(b=g('[data-p]')){[...$('sn').children].forEach(x=>x.classList.toggle('on',x===b));TABS.forEach(t=>$('p-'+t[0]).hidden=t[0]!==b.dataset.p);if(b.dataset.p==='qz'&&!QZ)nq();return}
  if(b=g('[data-e]')){$('cd').innerHTML=ENT[+b.dataset.e].html()+'<div class="btns"><button id="cdx" class="pri">Chiudi</button></div>';$('cd').showModal();return}
  if(g('#cdx'))return $('cd').close();
